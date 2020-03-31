@@ -1,0 +1,113 @@
+---
+# Global settings
+createSecret: true
+## Configuration value to select database type
+## Option to use "postgresql" or "mysql" database type, by default "postgresql" is chosen
+## Set the "enable" field to true of the database type you select (if you want to use internal database) and false of the one you don't select
+database: mysql
+host: defectdojo.default.minikube.local
+imagePullPolicy: Always
+tag: latest
+
+admin:
+  user: admin
+  firstName: Administrator
+  lastName: User
+  mail: admin@defectdojo.local
+
+# Components
+celery:
+  broker: rabbitmq
+  repository: defectdojo/defectdojo-django
+  logLevel: DEBUG
+  beat:
+    affinity: {}
+    nodeSelector: {}
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    tolerations: []
+  worker:
+    affinity: {}
+    repository: defectdojo/defectdojo-django
+    logLevel: DEBUG
+    nodeSelector: {}
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    tolerations: []
+
+django:
+  affinity: {}
+  ingress:
+    enabled: true
+    secretName: defectdojo-tls
+    annotations:
+      kubernetes.io/ingress.class: nginx
+  nginx:
+    repository: defectdojo/defectdojo-nginx
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+  nodeSelector: {}
+  replicas: 1
+  tolerations: []
+  uwsgi:
+    repository: defectdojo/defectdojo-django
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+initializer:
+  run: true
+  repository: defectdojo/defectdojo-django
+  keepSeconds: 60
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+mysql:
+  enabled: true
+  mysqlUser: defectdojo
+  mysqlDatabase: defectdojo
+  service:
+    port: 3306  
+  # To use an external mySQL instance, set enabled to false and uncomment
+  # the line below:
+  # mysqlServer: ""
+  # To use an external secret for the password for an external mySQL instance,
+  # set enabled to false and provide the name of the secret on the line below:
+  # mysqlPasswordSecret: ""  
+
+postgresql:
+  enabled: false
+  postgresqlUsername: defectdojo
+  postgresqlDatabase: defectdojo
+  persistence:
+    enabled: false
+  replication:
+    enabled: false
+  service:
+    port: 5432  
+  # To use an external PostgreSQL instance, set enabled to false and uncomment
+  # the line below:
+  # postgresServer: ""
+  # To use an external secret for the password for PostgreSQL
+  # instance, set enabled to false and provide the name of the secret on the
+  # line below:
+  # existingSecret: ""    
+
+rabbitmq:
+  enabled: true
+  replicas: 1
+
+redis:
+  enabled: false
+  cluster:
+    slaveCount: 1
